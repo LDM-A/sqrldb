@@ -100,14 +100,26 @@ pub struct Cursor {
 pub type LexerFn = fn(&str, Cursor) -> Option<(Token, Cursor)>;
 
 pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
-    let mut cur = ic;
 
+    let mut cur = ic; // mutable copy of our input cursor, so that we can move it forward as we are reading characters
+
+    /* 
+        Keeping track wether we have seen a period ',' or an exponent marker 'e' || 'E'
+        We need to keep track of this so that we can follow the logic of what is considered a valid numerical value
+        According to the PostgreSQL documentation (https://www.postgresql.org/docs/current/sql-syntax-lexical.html)
+     */
     let mut period_found = false;
     let mut exp_marker_found = false;
 
     // Iterate over characters starting at current pointer
     while (cur.pointer as usize) < source.len() {
         // SAFETY: assume ASCII
+        /*
+            start here 
+            look at first digit 
+            decide what it is (digit, period, exponent)
+            t
+         */
         let c = source.as_bytes()[cur.pointer as usize] as char;
         cur.loc.col += 1;
 
@@ -115,6 +127,7 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
         let is_period = c == '.';
         let is_exp_marker = c == 'e' || c == 'E';
 
+        // Rule #1 
         // Must start with digit or period
         if cur.pointer == ic.pointer {
             if !is_digit && !is_period {
@@ -246,3 +259,27 @@ pub fn lex(source: String) -> Result<Vec<Token>, String> {
     
 
     
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_cursor() -> Cursor {
+        Cursor {
+            pointer: 0,
+            loc: Location { line: 1, col: 1 },
+        }
+    }
+
+    #[test]
+    fn test_integer() {
+        let source = "123";
+        let result = lex_numeric(source, make_cursor());
+        assert!(result.is_some(), "Expected to lex an integer");
+        let (token, cur) = result.unwrap();
+        assert_eq!(token.value, "123");
+        assert_eq!(token.kind, TokenKind::NumericLiteral);
+        assert_eq!(cur.pointer as usize, source.len());
+    }
+}
