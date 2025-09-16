@@ -290,8 +290,7 @@ mod tests {
         let result = lex_numeric(source, make_cursor());
         assert!(result.is_some(), "Expected to lex a float");
         let (token, cur) = result.unwrap();
-        println!("{:?}", token);
-        println!("{:?}", cur);
+        println!("{}", token);
         assert_eq!(token.value, "3.14");
         assert_eq!(token.kind, TokenKind::NumericLiteral);
         assert_eq!(cur.pointer as usize, source.len());
@@ -304,7 +303,7 @@ mod tests {
         let result = lex_numeric(source, make_cursor());
         assert!(result.is_some(), "Expected to lex scientific notation");
         let (token, cur) = result.unwrap();
-        println!("{:?}", token);
+        println!("{}", token);
         println!("{:?}", cur);
         assert_eq!(token.value, "2.5e10");
         assert_eq!(token.kind, TokenKind::NumericLiteral);
@@ -317,7 +316,7 @@ mod tests {
         let result = lex_numeric(source, make_cursor());
         assert!(result.is_some(), "Expected to lex scientific notation with sign");
         let (token, cur) = result.unwrap();
-        println!("{:?}", token);
+        println!("{}", token);
         println!("{:?}", cur);
         assert_eq!(token.value, "1e-5");
         assert_eq!(token.kind, TokenKind::NumericLiteral);
