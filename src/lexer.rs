@@ -297,4 +297,31 @@ mod tests {
         assert_eq!(cur.pointer as usize, source.len());
     }
 
+
+    #[test]
+    fn test_scientific_notation() {
+        let source = "2.5e10";
+        let result = lex_numeric(source, make_cursor());
+        assert!(result.is_some(), "Expected to lex scientific notation");
+        let (token, cur) = result.unwrap();
+        println!("{:?}", token);
+        println!("{:?}", cur);
+        assert_eq!(token.value, "2.5e10");
+        assert_eq!(token.kind, TokenKind::NumericLiteral);
+        assert_eq!(cur.pointer as usize, source.len());
+    }
+
+    #[test]
+    fn test_scientific_notation_with_sign() {
+        let source = "1e-5";
+        let result = lex_numeric(source, make_cursor());
+        assert!(result.is_some(), "Expected to lex scientific notation with sign");
+        let (token, cur) = result.unwrap();
+        println!("{:?}", token);
+        println!("{:?}", cur);
+        assert_eq!(token.value, "1e-5");
+        assert_eq!(token.kind, TokenKind::NumericLiteral);
+        assert_eq!(cur.pointer as usize, source.len());
+    }
+
 }
