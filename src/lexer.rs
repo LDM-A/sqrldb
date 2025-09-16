@@ -210,11 +210,11 @@ pub fn lex(source: String) -> Result<Vec<Token>, String> {
     };
     'lex: while (cur.pointer as usize) < source.len() {
         let lexers: Vec<LexerFn> = vec![
-            lex_keyword,
-            lex_symbol,
-            lex_string,
+            //lex_keyword,
+            //lex_symbol,
+            //lex_string,
             lex_numeric,
-            lex_identifier,
+            //lex_identifier,
         ];
 
         for l in lexers {
