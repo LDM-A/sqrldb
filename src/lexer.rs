@@ -278,8 +278,23 @@ mod tests {
         let result = lex_numeric(source, make_cursor());
         assert!(result.is_some(), "Expected to lex an integer");
         let (token, cur) = result.unwrap();
+        println!("{:?}", token);
+        println!("{:?}", cur);
         assert_eq!(token.value, "123");
         assert_eq!(token.kind, TokenKind::NumericLiteral);
         assert_eq!(cur.pointer as usize, source.len());
     }
+    #[test]
+    fn test_float() {
+        let source = "3.14";
+        let result = lex_numeric(source, make_cursor());
+        assert!(result.is_some(), "Expected to lex a float");
+        let (token, cur) = result.unwrap();
+        println!("{:?}", token);
+        println!("{:?}", cur);
+        assert_eq!(token.value, "3.14");
+        assert_eq!(token.kind, TokenKind::NumericLiteral);
+        assert_eq!(cur.pointer as usize, source.len());
+    }
+
 }
