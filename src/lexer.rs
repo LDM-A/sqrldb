@@ -107,7 +107,7 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
 
     // Iterate over characters starting at current pointer
     while (cur.pointer as usize) < source.len() {
-        // SAFETY: assume ASCII (Go code does this too)
+        // SAFETY: assume ASCII
         let c = source.as_bytes()[cur.pointer as usize] as char;
         cur.loc.col += 1;
 
