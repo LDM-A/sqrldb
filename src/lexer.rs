@@ -99,7 +99,7 @@ pub struct Cursor {
 
 pub type LexerFn = fn(&str, Cursor) -> Option<(Token, Cursor)>;
 
-pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
+pub fn lex_numeric(input: &str, ic: Cursor) -> Option<(Token, Cursor)> {
 
     let mut cur = ic; // mutable copy of our input cursor, so that we can move it forward as we are reading characters
 
@@ -112,7 +112,7 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
     let mut exp_marker_found = false;
 
     // Iterate over characters starting at current pointer
-    while (cur.pointer) < source.len() {
+    while (cur.pointer) < input.len() {
         // SAFETY: assume ASCII
         /*
             start here 
@@ -120,7 +120,7 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
             decide what it is (digit, period, exponent)
             t
          */
-        let c = source.as_bytes()[cur.pointer] as char;
+        let c = input.as_bytes()[cur.pointer] as char;
         cur.loc.col += 1;
 
         let is_digit = c >= '0' && c <= '9';
@@ -155,11 +155,11 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
             exp_marker_found = true;
 
             // expMarker must be followed by digits
-            if (cur.pointer) == source.len() - 1 {
+            if (cur.pointer) == input.len() - 1 {
                 return None;
             }
 
-            let c_next = source.as_bytes()[cur.pointer + 1] as char;
+            let c_next = input.as_bytes()[cur.pointer + 1] as char;
             cur.pointer += 1;
             cur.loc.col += 1;
 
@@ -182,7 +182,7 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
         return None;
     }
 
-    let value = &source[ic.pointer ..cur.pointer];
+    let value = &input[ic.pointer ..cur.pointer];
     Some((
         Token {
             value: value.to_string(),
@@ -192,7 +192,7 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
         cur,
     ))
 }
-/* 
+
 fn lex_character_delimited(input: &str, ic: Cursor, delimiter: char) -> Option<(Token, Cursor)> { 
 
     let mut cur = ic;
@@ -209,13 +209,12 @@ fn lex_character_delimited(input: &str, ic: Cursor, delimiter: char) -> Option<(
 
     let value: Vec<Bytes>;
     while (cur.pointer) < input.len() {
-
+        //let c = inp
     }
 
 
-    return Some(())
+    todo!()
 }
-*/
 
 
 /* 
