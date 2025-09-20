@@ -209,7 +209,12 @@ fn lex_character_delimited(input: &str, ic: Cursor, delimiter: char) -> Option<(
 
     let value: Vec<Bytes>;
     while (cur.pointer) < input.len() {
-        //let c = inp
+        let c = input.as_bytes()[cur.pointer] as char;
+        
+        // SQL escapes through doule characters not backslash
+        if c == delimiter {
+            todo!()
+        }
     }
 
 
