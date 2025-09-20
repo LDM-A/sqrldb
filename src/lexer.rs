@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, str::Bytes};
 
 #[derive(Debug, Clone,Copy, PartialEq, Eq)]
 pub struct Location {
@@ -92,7 +92,7 @@ impl fmt::Display for Token {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Cursor {
-    pointer: u32,
+    pointer: usize,
     loc: Location,
 }
 
@@ -112,7 +112,7 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
     let mut exp_marker_found = false;
 
     // Iterate over characters starting at current pointer
-    while (cur.pointer as usize) < source.len() {
+    while (cur.pointer) < source.len() {
         // SAFETY: assume ASCII
         /*
             start here 
@@ -120,7 +120,7 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
             decide what it is (digit, period, exponent)
             t
          */
-        let c = source.as_bytes()[cur.pointer as usize] as char;
+        let c = source.as_bytes()[cur.pointer] as char;
         cur.loc.col += 1;
 
         let is_digit = c >= '0' && c <= '9';
@@ -155,11 +155,11 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
             exp_marker_found = true;
 
             // expMarker must be followed by digits
-            if (cur.pointer as usize) == source.len() - 1 {
+            if (cur.pointer) == source.len() - 1 {
                 return None;
             }
 
-            let c_next = source.as_bytes()[cur.pointer as usize + 1] as char;
+            let c_next = source.as_bytes()[cur.pointer + 1] as char;
             cur.pointer += 1;
             cur.loc.col += 1;
 
@@ -182,7 +182,7 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
         return None;
     }
 
-    let value = &source[ic.pointer as usize..cur.pointer as usize];
+    let value = &source[ic.pointer ..cur.pointer];
     Some((
         Token {
             value: value.to_string(),
@@ -192,7 +192,30 @@ pub fn lex_numeric(source: &str, ic: Cursor) -> Option<(Token, Cursor)> {
         cur,
     ))
 }
+/* 
+fn lex_character_delimited(input: &str, ic: Cursor, delimiter: char) -> Option<(Token, Cursor)> { 
 
+    let mut cur = ic;
+
+    if input.len() == 0 {
+        return None;
+    }
+
+    if input.as_bytes()[cur.pointer] as char != delimiter {
+        return None;
+    }
+    cur.loc.col += 1;
+    cur.pointer += 1;
+
+    let value: Vec<Bytes>;
+    while (cur.pointer) < input.len() {
+
+    }
+
+
+    return Some(())
+}
+*/
 
 
 /* 
@@ -205,9 +228,7 @@ fn lex_symbol(input: &str, cursor: Cursor) -> Option<(Token, Cursor)> {
 
 }
 
-fn lex_string(input: &str, cursor: Cursor) -> Option<(Token, Cursor)> { 
 
-}
 
 
 fn lex_identifier(input: &str, cursor: Cursor) -> Option<(Token, Cursor)> { 
@@ -221,7 +242,7 @@ pub fn lex(source: String) -> Result<Vec<Token>, String> {
         pointer: 0,
         loc: Location {line:1, col:1,}
     };
-    'lex: while (cur.pointer as usize) < source.len() {
+    'lex: while (cur.pointer) < source.len() {
         let lexers: Vec<LexerFn> = vec![
             //lex_keyword,
             //lex_symbol,
@@ -282,7 +303,7 @@ mod tests {
         println!("{:?}", cur);
         assert_eq!(token.value, "123");
         assert_eq!(token.kind, TokenKind::NumericLiteral);
-        assert_eq!(cur.pointer as usize, source.len());
+        assert_eq!(cur.pointer, source.len());
     }
     #[test]
     fn test_float() {
@@ -293,7 +314,7 @@ mod tests {
         println!("{}", token);
         assert_eq!(token.value, "3.14");
         assert_eq!(token.kind, TokenKind::NumericLiteral);
-        assert_eq!(cur.pointer as usize, source.len());
+        assert_eq!(cur.pointer, source.len());
     }
 
 
@@ -307,7 +328,7 @@ mod tests {
         println!("{:?}", cur);
         assert_eq!(token.value, "2.5e10");
         assert_eq!(token.kind, TokenKind::NumericLiteral);
-        assert_eq!(cur.pointer as usize, source.len());
+        assert_eq!(cur.pointer, source.len());
     }
 
     #[test]
@@ -320,7 +341,7 @@ mod tests {
         println!("{:?}", cur);
         assert_eq!(token.value, "1e-5");
         assert_eq!(token.kind, TokenKind::NumericLiteral);
-        assert_eq!(cur.pointer as usize, source.len());
+        assert_eq!(cur.pointer, source.len());
     }
 
 }
