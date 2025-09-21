@@ -207,18 +207,33 @@ fn lex_character_delimited(input: &str, ic: Cursor, delimiter: char) -> Option<(
     cur.loc.col += 1;
     cur.pointer += 1;
 
-    let value: Vec<Bytes>;
+    let mut value: String = "".to_string();
     while (cur.pointer) < input.len() {
         let c = input.as_bytes()[cur.pointer] as char;
         
         // SQL escapes through doule characters not backslash
         if c == delimiter {
-            todo!()
+            if cur.pointer+1 >= input.len() || input.as_bytes()[cur.pointer + 1] as char != delimiter {
+                return Some((Token {
+                    value: value.to_string(),
+                    loc: ic.loc,
+                    kind: TokenKind::StringLiteral
+                    },
+                    cur
+                ))
+            } else {
+                value = format!("{}{}", value, delimiter);
+                cur.pointer += 1;
+                cur.loc.col += 1;
+            }
         }
+        
     }
+    return None
+}
 
-
-    todo!()
+fn lex_string(input: &str, ic: Cursor) -> Option<(Token, Cursor)> {
+    return lex_character_delimited(input, ic, '\'');
 }
 
 
@@ -231,9 +246,6 @@ fn lex_keyword(input: &str, cursor: Cursor) -> Option<(Token, Cursor)> {
 fn lex_symbol(input: &str, cursor: Cursor) -> Option<(Token, Cursor)> { 
 
 }
-
-
-
 
 fn lex_identifier(input: &str, cursor: Cursor) -> Option<(Token, Cursor)> { 
 
