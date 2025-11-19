@@ -224,7 +224,7 @@ fn lex_character_delimited(input: &str, ic: Cursor, delimiter: char) -> Option<(
                     cur
                 ))
             } else {
-                value = format!("{}{}", value, delimiter);
+                value.push(delimiter);
                 cur.pointer += 2;
                 cur.loc.col += 2;
             }
