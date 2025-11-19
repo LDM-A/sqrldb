@@ -204,29 +204,34 @@ fn lex_character_delimited(input: &str, ic: Cursor, delimiter: char) -> Option<(
     if input.as_bytes()[cur.pointer] as char != delimiter {
         return None;
     }
+
     cur.loc.col += 1;
     cur.pointer += 1;
 
-    let mut value: String = "".to_string();
+    let mut value = String::new();
     while (cur.pointer) < input.len() {
         let c = input.as_bytes()[cur.pointer] as char;
-        
-        // SQL escapes through doule characters not backslash
+
+        // SQL escapes through double characters not backslash
         if c == delimiter {
-            if cur.pointer+1 >= input.len() || input.as_bytes()[cur.pointer + 1] as char != delimiter {
-                return Some((Token {
-                    value: value.to_string(),
-                    loc: ic.loc,
-                    kind: TokenKind::StringLiteral
+            if cur.pointer + 1 >= input.len() || input.as_bytes()[cur.pointer + 1] as char != delimiter {
+                return Some((
+                    Token {
+                        value: value.to_string(),
+                        loc: ic.loc,
+                        kind: TokenKind::StringLiteral
                     },
                     cur
                 ))
             } else {
                 value = format!("{}{}", value, delimiter);
-                cur.pointer += 1;
-                cur.loc.col += 1;
+                cur.pointer += 2;
+                cur.loc.col += 2;
             }
         }
+        value.push(c);
+        cur.loc.col += 1;
+        cur.pointer += 1;
         
     }
     return None
@@ -262,7 +267,7 @@ pub fn lex(source: String) -> Result<Vec<Token>, String> {
         let lexers: Vec<LexerFn> = vec![
             //lex_keyword,
             //lex_symbol,
-            //lex_string,
+            lex_string,
             lex_numeric,
             //lex_identifier,
         ];
@@ -338,6 +343,7 @@ mod tests {
     fn test_scientific_notation() {
         let source = "2.5e10";
         let result = lex_numeric(source, make_cursor());
+        
         assert!(result.is_some(), "Expected to lex scientific notation");
         let (token, cur) = result.unwrap();
         println!("{}", token);
@@ -358,6 +364,22 @@ mod tests {
         assert_eq!(token.value, "1e-5");
         assert_eq!(token.kind, TokenKind::NumericLiteral);
         assert_eq!(cur.pointer, source.len());
+    }
+
+
+
+    #[test]
+    fn test_string() {
+        let source = "\'SQL\'";
+        let result = lex_string(source, make_cursor());
+        assert!(result.is_some(), "Expected to lex a string");
+        let (token, cur) = result.unwrap();
+        println!("{}", token);
+        println!("{:?}", cur);
+        assert_eq!(token.value, "SQL");
+        assert_eq!(token.kind, TokenKind::StringLiteral);
+        assert_eq!(cur.pointer, source.len() - 1 );
+        
     }
 
 }
